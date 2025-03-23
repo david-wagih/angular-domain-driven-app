@@ -19,25 +19,25 @@ export class LocalStorageUserRepository implements UserRepository {
 
   async findById(id: UserId): Promise<User | null> {
     const users = this.getUsers();
-    const userData = users.find(u => u.id.value === id.value);
+    const userData = users.find(u => u.getId().getValue() === id.getValue());
     return userData || null;
   }
 
   async findByEmail(email: Email): Promise<User | null> {
     const users = this.getUsers();
-    const userData = users.find(u => u.email.value === email.value);
+    const userData = users.find(u => u.getEmail() === email);
     return userData || null;
   }
 
   async findByUsername(username: string): Promise<User | null> {
     const users = this.getUsers();
-    const userData = users.find(u => u.username === username);
+    const userData = users.find(u => u.getUsername() === username);
     return userData || null;
   }
 
   async save(user: User): Promise<void> {
     const users = this.getUsers();
-    const index = users.findIndex(u => u.id.value === user.id.value);
+    const index = users.findIndex(u => u.getId().getValue() === user.getId().getValue());
     
     if (index >= 0) {
       users[index] = user;
@@ -50,22 +50,22 @@ export class LocalStorageUserRepository implements UserRepository {
 
   async delete(id: UserId): Promise<void> {
     const users = this.getUsers();
-    const filteredUsers = users.filter(u => u.id.value !== id.value);
+    const filteredUsers = users.filter(u => u.getId().getValue() !== id.getValue());
     this.saveUsers(filteredUsers);
   }
 
   async exists(id: UserId): Promise<boolean> {
     const users = this.getUsers();
-    return users.some(u => u.id.value === id.value);
+    return users.some(u => u.getId().getValue() === id.getValue());
   }
 
   async existsByEmail(email: Email): Promise<boolean> {
     const users = this.getUsers();
-    return users.some(u => u.email.value === email.value);
+    return users.some(u => u.getEmail().value === email.value);
   }
 
   async existsByUsername(username: string): Promise<boolean> {
     const users = this.getUsers();
-    return users.some(u => u.username === username);
+    return users.some(u => u.getUsername() === username);
   }
 } 

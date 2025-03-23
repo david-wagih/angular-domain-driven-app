@@ -1,10 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
 import { User } from '../entities/user.entity';
 import { UserRepository, USER_REPOSITORY } from '../repositories/user.repository';
 import { Email } from '../value-objects/email.value-object';
 import { Password } from '../value-objects/password.value-object';
 import { UserId } from '../value-objects/user-id.value-object';
-import { Inject } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
@@ -19,17 +18,16 @@ export class AuthService {
 
   async login(email: Email, password: string): Promise<User> {
     const user = await this.userRepository.findByEmail(email);
-    
     if (!user) {
       throw new Error('User not found');
     }
 
-    if (!user.validatePassword(password)) {
-      throw new Error('Invalid password');
+    if (!user.isUserActive()) {
+      throw new Error('User account is deactivated');
     }
 
-    if (!user.isActive) {
-      throw new Error('User account is deactivated');
+    if (password !== user.getPassword().toString()) {
+      throw new Error('Invalid password');
     }
 
     this.currentUser = user;
@@ -44,24 +42,23 @@ export class AuthService {
     lastName: string
   ): Promise<User> {
     if (await this.userRepository.existsByEmail(email)) {
-      throw new Error('Email already registered');
+      throw new Error('Email already exists');
     }
 
     if (await this.userRepository.existsByUsername(username)) {
-      throw new Error('Username already taken');
+      throw new Error('Username already exists');
     }
 
-    const userId = new UserId(crypto.randomUUID());
-    const user = new User(
-      userId,
-      username,
+    const user = User.create(
       email,
       password,
+      username,
       firstName,
       lastName
     );
 
     await this.userRepository.save(user);
+    this.currentUser = user;
     return user;
   }
 
@@ -85,8 +82,8 @@ export class AuthService {
 
     user.deactivate();
     await this.userRepository.save(user);
-    
-    if (this.currentUser?.id.equals(userId)) {
+
+    if (this.currentUser?.getId().equals(userId)) {
       this.logout();
     }
   }

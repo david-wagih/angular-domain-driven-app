@@ -1,22 +1,31 @@
 export class UserId {
-  private readonly _value: string;
-
-  constructor(value: string) {
-    if (!value) {
-      throw new Error('User ID cannot be empty');
-    }
-    this._value = value;
+  private constructor(private readonly value: string) {
+    this.validate();
   }
 
-  get value(): string {
-    return this._value;
+  private validate(): void {
+    if (!this.value || this.value.trim().length === 0) {
+      throw new Error('User ID is required');
+    }
+  }
+
+  static create(value: string): UserId {
+    return new UserId(value.trim());
+  }
+
+  static generate(): UserId {
+    return new UserId(crypto.randomUUID());
+  }
+
+  getValue(): string {
+    return this.value;
   }
 
   equals(other: UserId): boolean {
-    return this._value === other._value;
+    return this.value === other.value;
   }
 
   toString(): string {
-    return this._value;
+    return this.value;
   }
 } 

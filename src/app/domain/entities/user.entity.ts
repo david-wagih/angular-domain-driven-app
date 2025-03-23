@@ -1,89 +1,237 @@
 import { Email } from "../value-objects/email.value-object";
 import { Password } from "../value-objects/password.value-object";
 import { UserId } from "../value-objects/user-id.value-object";
+import { Address } from '../value-objects/address.value-object';
+import { PhoneNumber } from '../value-objects/phone-number.value-object';
+import { UserPreferences } from '../value-objects/user-preferences.value-object';
 
 export class User {
-  private readonly _id: UserId;
-  private _username: string;
-  private _email: Email;
-  private _password: Password;
-  private _firstName: string;
-  private _lastName: string;
-  private _isActive: boolean;
-  private _createdAt: Date;
-  private _updatedAt: Date;
+  private constructor(
+    private readonly id: UserId,
+    private readonly email: Email,
+    private readonly password: Password,
+    private readonly username: string,
+    private readonly firstName: string,
+    private readonly lastName: string,
+    private readonly isActive: boolean,
+    private readonly createdAt: Date,
+    private readonly updatedAt: Date,
+    private address?: Address,
+    private phoneNumber?: PhoneNumber,
+    private preferences?: UserPreferences
+  ) {
+    this.validate();
+  }
 
-  constructor(
-    id: UserId,
-    username: string,
+  private validate(): void {
+    if (!this.username || this.username.trim().length === 0) {
+      throw new Error('Username is required');
+    }
+    if (!this.firstName || this.firstName.trim().length === 0) {
+      throw new Error('First name is required');
+    }
+    if (!this.lastName || this.lastName.trim().length === 0) {
+      throw new Error('Last name is required');
+    }
+  }
+
+  static create(
     email: Email,
     password: Password,
+    username: string,
     firstName: string,
     lastName: string
-  ) {
-    this._id = id;
-    this._username = username;
-    this._email = email;
-    this._password = password;
-    this._firstName = firstName;
-    this._lastName = lastName;
-    this._isActive = true;
-    this._createdAt = new Date();
-    this._updatedAt = new Date();
+  ): User {
+    const now = new Date();
+    return new User(
+      UserId.generate(),
+      email,
+      password,
+      username.trim(),
+      firstName.trim(),
+      lastName.trim(),
+      true,
+      now,
+      now
+    );
   }
 
-  // Getters
-  get id(): UserId {
-    return this._id;
+  getId(): UserId {
+    return this.id;
   }
 
-  get username(): string {
-    return this._username;
+  getEmail(): Email {
+    return this.email;
   }
 
-  get email(): Email {
-    return this._email;
+  getPassword(): Password {
+    return this.password;
   }
 
-  get firstName(): string {
-    return this._firstName;
+  getUsername(): string {
+    return this.username;
   }
 
-  get lastName(): string {
-    return this._lastName;
+  getFirstName(): string {
+    return this.firstName;
   }
 
-  get fullName(): string {
-    return `${this._firstName} ${this._lastName}`;
+  getLastName(): string {
+    return this.lastName;
   }
 
-  get isActive(): boolean {
-    return this._isActive;
+  getFullName(): string {
+    return `${this.firstName} ${this.lastName}`;
   }
 
-  // Domain methods
-  public deactivate(): void {
-    this._isActive = false;
-    this._updatedAt = new Date();
+  isUserActive(): boolean {
+    return this.isActive;
   }
 
-  public activate(): void {
-    this._isActive = true;
-    this._updatedAt = new Date();
+  getCreatedAt(): Date {
+    return new Date(this.createdAt);
   }
 
-  public updateProfile(firstName: string, lastName: string): void {
-    this._firstName = firstName;
-    this._lastName = lastName;
-    this._updatedAt = new Date();
+  getUpdatedAt(): Date {
+    return new Date(this.updatedAt);
   }
 
-  public changePassword(newPassword: Password): void {
-    this._password = newPassword;
-    this._updatedAt = new Date();
+  getAddress(): Address | undefined {
+    return this.address;
   }
 
-  public validatePassword(password: string): boolean {
-    return this._password.validate(password);
+  getPhoneNumber(): PhoneNumber | undefined {
+    return this.phoneNumber;
+  }
+
+  getPreferences(): UserPreferences | undefined {
+    return this.preferences;
+  }
+
+  updateProfile(firstName: string, lastName: string): User {
+    return new User(
+      this.id,
+      this.email,
+      this.password,
+      this.username,
+      firstName.trim(),
+      lastName.trim(),
+      this.isActive,
+      this.createdAt,
+      new Date(),
+      this.address,
+      this.phoneNumber,
+      this.preferences
+    );
+  }
+
+  updateAddress(address: Address): User {
+    return new User(
+      this.id,
+      this.email,
+      this.password,
+      this.username,
+      this.firstName,
+      this.lastName,
+      this.isActive,
+      this.createdAt,
+      new Date(),
+      address,
+      this.phoneNumber,
+      this.preferences
+    );
+  }
+
+  updatePhoneNumber(phoneNumber: PhoneNumber): User {
+    return new User(
+      this.id,
+      this.email,
+      this.password,
+      this.username,
+      this.firstName,
+      this.lastName,
+      this.isActive,
+      this.createdAt,
+      new Date(),
+      this.address,
+      phoneNumber,
+      this.preferences
+    );
+  }
+
+  updatePreferences(preferences: UserPreferences): User {
+    return new User(
+      this.id,
+      this.email,
+      this.password,
+      this.username,
+      this.firstName,
+      this.lastName,
+      this.isActive,
+      this.createdAt,
+      new Date(),
+      this.address,
+      this.phoneNumber,
+      preferences
+    );
+  }
+
+  validatePassword(password: string): boolean {
+    return this.password.equals(new Password(password));
+  }
+
+  changePassword(newPassword: Password): User {
+    return new User(
+      this.id,
+      this.email,
+      newPassword,
+      this.username,
+      this.firstName,
+      this.lastName,
+      this.isActive,
+      this.createdAt,
+      new Date(),
+      this.address,
+      this.phoneNumber,
+      this.preferences
+    );
+  }
+
+  deactivate(): User {
+    return new User(
+      this.id,
+      this.email,
+      this.password,
+      this.username,
+      this.firstName,
+      this.lastName,
+      false,
+      this.createdAt,
+      new Date(),
+      this.address,
+      this.phoneNumber,
+      this.preferences
+    );
+  }
+
+  activate(): User {
+    return new User(
+      this.id,
+      this.email,
+      this.password,
+      this.username,
+      this.firstName,
+      this.lastName,
+      true,
+      this.createdAt,
+      new Date(),
+      this.address,
+      this.phoneNumber,
+      this.preferences
+    );
+  }
+
+  equals(other: User): boolean {
+    return this.id.equals(other.id);
   }
 } 

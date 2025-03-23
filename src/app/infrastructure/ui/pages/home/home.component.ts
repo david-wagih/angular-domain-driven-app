@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UserService } from '../../../../application/services/user.service';
+import { AuthService } from '../../../../domain/services/auth.service';
 import { UserDto } from '../../../../application/dtos/user.dto';
 
 @Component({
@@ -25,6 +25,9 @@ import { UserDto } from '../../../../application/dtos/user.dto';
           <span>{{ currentUser.firstName }} {{ currentUser.lastName }}</span>
         </div>
       </div>
+      <div *ngIf="!currentUser" class="auth-info">
+        <p>Please login or register to access your profile.</p>
+      </div>
     </div>
   `,
   styles: [`
@@ -47,12 +50,32 @@ import { UserDto } from '../../../../application/dtos/user.dto';
       font-weight: bold;
       margin-right: 0.5rem;
     }
+    .auth-info {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      text-align: center;
+      color: #666;
+    }
   `]
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
   currentUser: UserDto | null = null;
 
-  constructor(private userService: UserService) {
-    this.currentUser = this.userService.getCurrentUser();
+  constructor(private authService: AuthService) {}
+
+  ngOnInit(): void {
+    const user = this.authService.getCurrentUser();
+    if (user) {
+      this.currentUser = {
+        id: user.getId().toString(),
+        username: user.getUsername(),
+        email: user.getEmail().toString(),
+        firstName: user.getFirstName(),
+        lastName: user.getLastName(),
+        isActive: user.isUserActive(),
+        createdAt: user.getCreatedAt(),
+        updatedAt: user.getUpdatedAt()
+      };
+    }
   }
 } 
