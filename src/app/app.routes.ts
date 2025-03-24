@@ -1,13 +1,26 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './infrastructure/ui/pages/login/login.component';
-import { RegisterComponent } from './infrastructure/ui/pages/register/register.component';
-import { HomeComponent } from './infrastructure/ui/pages/home/home.component';
-import { ProfileComponent } from './infrastructure/ui/pages/profile/profile.component';
+import { AppLayoutComponent } from './infrastructure/ui/layout/app-layout.component';
+import { TripsComponent } from './infrastructure/ui/pages/trips/trips.component';
 
 export const routes: Routes = [
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
-  { path: 'home', component: HomeComponent },
-  { path: 'profile', component: ProfileComponent },
-  { path: '', redirectTo: '/home', pathMatch: 'full' }
+  {
+    path: '',
+    component: AppLayoutComponent,
+    children: [
+      {
+        path: '',
+        redirectTo: 'trips',
+        pathMatch: 'full'
+      },
+      {
+        path: 'trips',
+        component: TripsComponent
+      },
+      // Add more routes here as we create more pages
+      {
+        path: '**',
+        redirectTo: 'trips'
+      }
+    ]
+  }
 ]; 

@@ -1,10 +1,12 @@
 import { Injectable, Inject } from '@angular/core';
-import { User } from '../entities/user.entity';
 import { UserRepository, USER_REPOSITORY } from '../repositories/user.repository';
+import { UserId } from '../value-objects/user-id.value-object';
 import { Address } from '../value-objects/address.value-object';
 import { PhoneNumber } from '../value-objects/phone-number.value-object';
 import { UserPreferences } from '../value-objects/user-preferences.value-object';
-import { UserId } from '../value-objects/user-id.value-object';
+import { UserNotFoundException } from '../exceptions/user/user-not-found.exception';
+import { EventDispatcher } from '../events/event-dispatcher';
+import { UserProfileUpdatedEvent } from '../events/user/user-profile-updated.event';
 
 @Injectable({
   providedIn: 'root'
@@ -12,40 +14,53 @@ import { UserId } from '../value-objects/user-id.value-object';
 export class UserProfileService {
   constructor(
     @Inject(USER_REPOSITORY)
-    private readonly userRepository: UserRepository
+    private readonly userRepository: UserRepository,
+    private readonly eventDispatcher: EventDispatcher
   ) {}
 
-  async updateAddress(userId: UserId, address: Address): Promise<User> {
+  async updateAddress(userId: UserId, address: Address): Promise<void> {
     const user = await this.userRepository.findById(userId);
     if (!user) {
-      throw new Error('User not found');
+      throw new UserNotFoundException(userId);
     }
 
+    const oldUser = user;
     const updatedUser = user.updateAddress(address);
+    
     await this.userRepository.save(updatedUser);
-    return updatedUser;
+    
+    const event = new UserProfileUpdatedEvent(userId, oldUser, updatedUser);
+    this.eventDispatcher.dispatch(event);
   }
 
-  async updatePhoneNumber(userId: UserId, phoneNumber: PhoneNumber): Promise<User> {
+  async updatePhoneNumber(userId: UserId, phoneNumber: PhoneNumber): Promise<void> {
     const user = await this.userRepository.findById(userId);
     if (!user) {
-      throw new Error('User not found');
+      throw new UserNotFoundException(userId);
     }
 
+    const oldUser = user;
     const updatedUser = user.updatePhoneNumber(phoneNumber);
+    
     await this.userRepository.save(updatedUser);
-    return updatedUser;
+    
+    const event = new UserProfileUpdatedEvent(userId, oldUser, updatedUser);
+    this.eventDispatcher.dispatch(event);
   }
 
-  async updatePreferences(userId: UserId, preferences: UserPreferences): Promise<User> {
+  async updatePreferences(userId: UserId, preferences: UserPreferences): Promise<void> {
     const user = await this.userRepository.findById(userId);
     if (!user) {
-      throw new Error('User not found');
+      throw new UserNotFoundException(userId);
     }
 
+    const oldUser = user;
     const updatedUser = user.updatePreferences(preferences);
+    
     await this.userRepository.save(updatedUser);
-    return updatedUser;
+    
+    const event = new UserProfileUpdatedEvent(userId, oldUser, updatedUser);
+    this.eventDispatcher.dispatch(event);
   }
 
   async getProfile(userId: UserId): Promise<{
@@ -55,7 +70,7 @@ export class UserProfileService {
   }> {
     const user = await this.userRepository.findById(userId);
     if (!user) {
-      throw new Error('User not found');
+      throw new UserNotFoundException(userId);
     }
 
     return {

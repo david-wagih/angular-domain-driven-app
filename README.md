@@ -1,59 +1,101 @@
-# AngularDomainDrivenApp
+# Angular Domain-Driven Design Application
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.4.
+This project demonstrates an Angular application built using Domain-Driven Design (DDD) principles. It includes user authentication, profile management, and a modular architecture that separates domain logic from infrastructure concerns.
 
-## Development server
+## Architecture Overview
 
-To start a local development server, run:
+The application follows a layered architecture based on DDD:
 
-```bash
-ng serve
+```
+src/
+├── app/
+│   ├── modules/               # Feature Modules (organized by domain)
+│   │   ├── user/              # User Domain
+│   │   └── auth/              # Auth Domain
+│   ├── core/                  # Core Module (singleton services)
+│   ├── application/           # Application Layer
+│   │   ├── dtos/              # Data Transfer Objects
+│   │   └── services/          # Application Services
+│   ├── domain/                # Domain Layer
+│   │   ├── entities/          # Domain Entities
+│   │   ├── repositories/      # Repository Interfaces
+│   │   ├── services/          # Domain Services
+│   │   ├── exceptions/        # Domain Exceptions
+│   │   ├── events/            # Domain Events
+│   │   └── value-objects/     # Value Objects
+│   └── infrastructure/        # Infrastructure Layer
+│       ├── persistence/       # Repository Implementations
+│       └── ui/                # UI Components
+└── docs/                      # Documentation
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Key DDD Concepts Implemented
 
-## Code scaffolding
+1. **Rich Domain Model**: Entities with behavior, not just data
+2. **Value Objects**: Immutable objects representing concepts like Email, UserId, etc.
+3. **Domain Events**: For cross-aggregate communication
+4. **Repositories**: Interfaces in domain layer, implementations in infrastructure
+5. **Domain Services**: Complex operations that don't naturally fit on entities
+6. **Application Services**: Orchestration between UI and domain layer
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Features
 
-```bash
-ng generate component component-name
-```
+- **User Management**:
+  - Registration with validation
+  - Authentication and session management
+  - Profile management (address, phone, preferences)
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+- **Modular Structure**:
+  - Core module for singletons
+  - Feature modules for each domain
+  - Lazy loading for better performance
 
-```bash
-ng generate --help
-```
+## Getting Started
 
-## Building
+### Prerequisites
 
-To build the project run:
+- Node.js (v16+)
+- npm (v8+)
 
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+### Installation
 
 ```bash
-ng e2e
+# Clone the repository
+git clone https://github.com/yourusername/angular-domain-driven-app.git
+
+# Navigate to project directory
+cd angular-domain-driven-app
+
+# Install dependencies
+npm install
+
+# Start development server
+npm start
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Visit `http://localhost:4200/` to see the application.
 
-## Additional Resources
+## Development Guidelines
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+See the [ADDING_FEATURES.md](./docs/ADDING_FEATURES.md) document for guidelines on how to add new features while adhering to the DDD principles.
+
+## Key Technical Decisions
+
+1. **Local Storage Persistence**: For simplicity, the application uses localStorage for persistence, but the architecture allows for easy replacement with real backend services.
+
+2. **Module Organization**: Feature modules by domain with lazy loading.
+
+3. **Core Module**: Singleton services like repositories are provided through the Core module.
+
+4. **Event-Driven Communication**: Domain events for communication between bounded contexts.
+
+5. **Standalone Components**: Leveraging Angular's standalone components where appropriate for better tree-shaking.
+
+## Future Improvements
+
+- Server-side rendering (SSR) support
+- Integration with a real backend
+- More sophisticated authentication
+- Enhanced error handling
+- Unit and integration tests
+- CI/CD pipeline

@@ -5,9 +5,7 @@ import { Email } from '../value-objects/email.value-object';
 import { Password } from '../value-objects/password.value-object';
 import { UserId } from '../value-objects/user-id.value-object';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class AuthService {
   private currentUser: User | null = null;
 

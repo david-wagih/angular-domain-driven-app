@@ -4,8 +4,11 @@ import { UserId } from "../value-objects/user-id.value-object";
 import { Address } from '../value-objects/address.value-object';
 import { PhoneNumber } from '../value-objects/phone-number.value-object';
 import { UserPreferences } from '../value-objects/user-preferences.value-object';
+import { DomainEvent } from '../events/domain-event';
 
 export class User {
+  private domainEvents: DomainEvent[] = [];
+
   private constructor(
     private readonly id: UserId,
     private readonly email: Email,
@@ -106,6 +109,21 @@ export class User {
 
   getPreferences(): UserPreferences | undefined {
     return this.preferences;
+  }
+
+  // Domain events
+  addDomainEvent(event: DomainEvent): void {
+    this.domainEvents.push(event);
+  }
+
+  clearDomainEvents(): DomainEvent[] {
+    const events = [...this.domainEvents];
+    this.domainEvents = [];
+    return events;
+  }
+
+  getDomainEvents(): DomainEvent[] {
+    return [...this.domainEvents];
   }
 
   updateProfile(firstName: string, lastName: string): User {
