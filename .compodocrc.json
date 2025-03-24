@@ -1,0 +1,21 @@
+{
+  "name": "Angular Domain Driven App Documentation",
+  "theme": "material",
+  "output": "documentation",
+  "tsconfig": "tsconfig.json",
+  "hideGenerator": true,
+  "disableSourceCode": false,
+  "disableDomTree": false,
+  "disableTemplateTab": false,
+  "disableGraph": false,
+  "disableCoverage": false,
+  "disablePrivate": false,
+  "disableProtected": false,
+  "disableInternal": false,
+  "disableLifeCycleHooks": false,
+  "customFavicon": "src/favicon.ico",
+  "gaID": "",
+  "includeOnly": [
+    "src/app"
+  ]
+} 
