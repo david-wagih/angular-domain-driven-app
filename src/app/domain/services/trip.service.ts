@@ -1,55 +1,95 @@
 import { Injectable, Inject } from '@angular/core';
+import { TRIP_REPOSITORY, TripRepository } from '../repositories/trip.repository';
 import { Trip } from '../entities/trip.entity';
-import { TripRepository, TRIP_REPOSITORY } from '../repositories/trip.repository';
 import { TripId } from '../value-objects/trip-id.value-object';
 import { Location } from '../value-objects/location.value-object';
 import { DateRange } from '../value-objects/date-range.value-object';
 import { Price } from '../value-objects/price.value-object';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class TripService {
   constructor(
-    @Inject(TRIP_REPOSITORY)
-    private readonly tripRepository: TripRepository
+    @Inject(TRIP_REPOSITORY) private readonly tripRepository: TripRepository
   ) {}
 
-  async getTripById(id: TripId): Promise<Trip | null> {
-    return this.tripRepository.findById(id);
+  async getTrip(id: string): Promise<Trip | null> {
+    return this.tripRepository.findById(TripId.fromString(id));
   }
 
   async getAllTrips(): Promise<Trip[]> {
     return this.tripRepository.findAll();
   }
 
+  async createTrip(
+    title: string,
+    description: string,
+    imageUrl: string,
+    location: Location,
+    dateRange: DateRange,
+    price: Price,
+    maxParticipants: number,
+    tags: string[]
+  ): Promise<Trip> {
+    const trip = Trip.create(
+      title,
+      description,
+      imageUrl,
+      location,
+      dateRange,
+      price,
+      maxParticipants,
+      tags
+    );
+    await this.tripRepository.save(trip);
+    return trip;
+  }
+
+  async updateTrip(trip: Trip): Promise<void> {
+    await this.tripRepository.save(trip);
+  }
+
+  async deleteTrip(id: string): Promise<void> {
+    await this.tripRepository.delete(TripId.fromString(id));
+  }
+
+  async tripExists(id: string): Promise<boolean> {
+    return this.tripRepository.exists(TripId.fromString(id));
+  }
+
   async searchTrips(
-    location?: Location,
+    location?: string,
     startDate?: Date,
     endDate?: Date,
-    maxPrice?: Price
+    maxPrice?: number
   ): Promise<Trip[]> {
-    let trips = await this.tripRepository.findAll();
+    const trips = await this.getAllTrips();
+    
+    return trips.filter(trip => {
+      if (location) {
+        const tripLocation = trip.getLocation();
+        const searchLower = location.toLowerCase();
+        if (!tripLocation.getCity().toLowerCase().includes(searchLower) &&
+            !tripLocation.getCountry().toLowerCase().includes(searchLower)) {
+          return false;
+        }
+      }
 
-    if (location) {
-      trips = trips.filter(trip => 
-        trip.getLocation().getCity().toLowerCase() === location.getCity().toLowerCase() &&
-        trip.getLocation().getCountry().toLowerCase() === location.getCountry().toLowerCase()
-      );
-    }
+      if (startDate && trip.getDateRange().getStartDate() < startDate) {
+        return false;
+      }
 
-    if (startDate && endDate) {
-      trips = trips.filter(trip => {
-        const tripRange = trip.getDateRange();
-        return tripRange.getStartDate() >= startDate && tripRange.getEndDate() <= endDate;
-      });
-    }
+      if (endDate && trip.getDateRange().getEndDate() > endDate) {
+        return false;
+      }
 
-    if (maxPrice) {
-      trips = trips.filter(trip => 
-        trip.getPrice().getAmount() <= maxPrice.getAmount()
-      );
-    }
+      if (maxPrice && trip.getPrice().getAmount() > maxPrice) {
+        return false;
+      }
 
-    return trips;
+      return true;
+    });
   }
 
   async bookTrip(tripId: TripId): Promise<void> {
@@ -72,7 +112,8 @@ export class TripService {
     const locationCount = new Map<string, number>();
     
     trips.forEach(trip => {
-      const locationKey = `${trip.getLocation().getCity()}-${trip.getLocation().getCountry()}`;
+      const location = trip.getLocation();
+      const locationKey = `${location.getCity()}-${location.getCountry()}`;
       locationCount.set(locationKey, (locationCount.get(locationKey) || 0) + 1);
     });
 

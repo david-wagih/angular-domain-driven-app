@@ -41,4 +41,8 @@ export interface SearchTripsDto {
 export interface BookTripDto {
   tripId: string;
   userId: string;
-} 
+}
+
+export type CreateTripDto = Omit<TripDto, 'id' | 'currentParticipants' | 'rating'>;
+
+export type UpdateTripDto = Partial<CreateTripDto>; 

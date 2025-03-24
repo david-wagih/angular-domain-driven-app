@@ -4,21 +4,25 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { TripApplicationService } from '../../application/services/trip.application.service';
 import { TripService } from '../../domain/services/trip.service';
-import { TripCardComponent } from '../../infrastructure/ui/components/trip-card/trip-card.component';
-import { TripsComponent } from '../../infrastructure/ui/pages/trips/trips.component';
-import { tripsRoutes } from './trips.routes';
+import { TripCardComponent } from './components/trip-card/trip-card.component';
+import { TRIPS_ROUTES } from './trips.routes';
+import { TRIP_REPOSITORY } from '../../domain/repositories/trip.repository';
+import { MockTripRepository } from '../../infrastructure/persistence/mock-trip.repository';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
-    RouterModule.forChild(tripsRoutes),
+    RouterModule.forChild(TRIPS_ROUTES),
     TripCardComponent,
-    TripsComponent
   ],
   providers: [
     TripApplicationService,
-    TripService
+    TripService,
+    {
+      provide: TRIP_REPOSITORY,
+      useClass: MockTripRepository
+    }
   ]
 })
 export class TripsModule { } 

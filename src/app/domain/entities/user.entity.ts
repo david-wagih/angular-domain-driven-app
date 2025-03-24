@@ -5,9 +5,11 @@ import { Address } from '../value-objects/address.value-object';
 import { PhoneNumber } from '../value-objects/phone-number.value-object';
 import { UserPreferences } from '../value-objects/user-preferences.value-object';
 import { DomainEvent } from '../events/domain-event';
+import { UserProfileUpdatedEvent } from '../events/user/user-profile-updated.event';
 
 export class User {
   private domainEvents: DomainEvent[] = [];
+  private role: 'user' | 'admin' = 'user';
 
   private constructor(
     private readonly id: UserId,
@@ -27,13 +29,13 @@ export class User {
   }
 
   private validate(): void {
-    if (!this.username || this.username.trim().length === 0) {
-      throw new Error('Username is required');
+    if (!this.username || this.username.length < 3) {
+      throw new Error('Username must be at least 3 characters long');
     }
-    if (!this.firstName || this.firstName.trim().length === 0) {
+    if (!this.firstName) {
       throw new Error('First name is required');
     }
-    if (!this.lastName || this.lastName.trim().length === 0) {
+    if (!this.lastName) {
       throw new Error('Last name is required');
     }
   }
@@ -43,10 +45,11 @@ export class User {
     password: Password,
     username: string,
     firstName: string,
-    lastName: string
+    lastName: string,
+    role: 'user' | 'admin' = 'user'
   ): User {
     const now = new Date();
-    return new User(
+    const user = new User(
       UserId.generate(),
       email,
       password,
@@ -57,6 +60,8 @@ export class User {
       now,
       now
     );
+    user.role = role;
+    return user;
   }
 
   getId(): UserId {
@@ -111,15 +116,17 @@ export class User {
     return this.preferences;
   }
 
+  isAdmin(): boolean {
+    return this.role === 'admin';
+  }
+
   // Domain events
   addDomainEvent(event: DomainEvent): void {
     this.domainEvents.push(event);
   }
 
-  clearDomainEvents(): DomainEvent[] {
-    const events = [...this.domainEvents];
+  clearDomainEvents(): void {
     this.domainEvents = [];
-    return events;
   }
 
   getDomainEvents(): DomainEvent[] {
@@ -127,7 +134,8 @@ export class User {
   }
 
   updateProfile(firstName: string, lastName: string): User {
-    return new User(
+    const oldUser = this;
+    const updatedUser = new User(
       this.id,
       this.email,
       this.password,
@@ -141,10 +149,13 @@ export class User {
       this.phoneNumber,
       this.preferences
     );
+    updatedUser.domainEvents.push(new UserProfileUpdatedEvent(this.id, oldUser, updatedUser));
+    return updatedUser;
   }
 
   updateAddress(address: Address): User {
-    return new User(
+    const oldUser = this;
+    const updatedUser = new User(
       this.id,
       this.email,
       this.password,
@@ -158,10 +169,13 @@ export class User {
       this.phoneNumber,
       this.preferences
     );
+    updatedUser.domainEvents.push(new UserProfileUpdatedEvent(this.id, oldUser, updatedUser));
+    return updatedUser;
   }
 
   updatePhoneNumber(phoneNumber: PhoneNumber): User {
-    return new User(
+    const oldUser = this;
+    const updatedUser = new User(
       this.id,
       this.email,
       this.password,
@@ -175,10 +189,13 @@ export class User {
       phoneNumber,
       this.preferences
     );
+    updatedUser.domainEvents.push(new UserProfileUpdatedEvent(this.id, oldUser, updatedUser));
+    return updatedUser;
   }
 
   updatePreferences(preferences: UserPreferences): User {
-    return new User(
+    const oldUser = this;
+    const updatedUser = new User(
       this.id,
       this.email,
       this.password,
@@ -192,10 +209,12 @@ export class User {
       this.phoneNumber,
       preferences
     );
+    updatedUser.domainEvents.push(new UserProfileUpdatedEvent(this.id, oldUser, updatedUser));
+    return updatedUser;
   }
 
-  validatePassword(password: string): boolean {
-    return this.password.equals(new Password(password));
+  validatePassword(password: Password): boolean {
+    return this.password.equals(password);
   }
 
   changePassword(newPassword: Password): User {

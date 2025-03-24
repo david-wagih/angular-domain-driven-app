@@ -1,15 +1,18 @@
 import { Injectable, Inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { User } from '../entities/user.entity';
-import { USER_REPOSITORY, UserRepository } from '../repositories/user.repository';
-import { UserPreferences } from '../value-objects/user-preferences.value-object';
-import { RegisterUserDto, LoginUserDto } from '../../application/dtos/user.dto';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { User } from '../../domain/entities/user.entity';
+import { USER_REPOSITORY, UserRepository } from '../../domain/repositories/user.repository';
+import { UserPreferences } from '../../domain/value-objects/user-preferences.value-object';
+import { RegisterUserDto, LoginUserDto } from '../dtos/user.dto';
+
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private readonly TOKEN_KEY = 'auth_token';
-  private currentUser: User | null = null;
+  private currentUserSubject = new BehaviorSubject<User | null>(null);
+  public currentUser$: Observable<User | null> = this.currentUserSubject.asObservable();
 
   constructor(
     @Inject(USER_REPOSITORY) private userRepository: UserRepository,
@@ -21,7 +24,8 @@ export class AuthService {
   private async initializeAuth(): Promise<void> {
     const token = localStorage.getItem(this.TOKEN_KEY);
     if (token) {
-      this.currentUser = await this.userRepository.validateToken(token);
+      const user = await this.userRepository.validateToken(token);
+      this.currentUserSubject.next(user);
     }
   }
 
@@ -29,7 +33,7 @@ export class AuthService {
     try {
       const result = await this.userRepository.authenticate(credentials);
       if (result) {
-        this.currentUser = result.user;
+        this.currentUserSubject.next(result.user);
         localStorage.setItem(this.TOKEN_KEY, result.token);
         return true;
       }
@@ -41,13 +45,13 @@ export class AuthService {
   }
 
   logout(): void {
-    this.currentUser = null;
+    this.currentUserSubject.next(null);
     localStorage.removeItem(this.TOKEN_KEY);
     this.router.navigate(['/auth/login']);
   }
 
   isAuthenticated(): boolean {
-    return !!this.currentUser;
+    return !!this.currentUserSubject.value;
   }
 
   getToken(): string | null {
@@ -55,13 +59,14 @@ export class AuthService {
   }
 
   async getCurrentUser(): Promise<User | null> {
-    if (!this.currentUser) {
+    if (!this.currentUserSubject.value) {
       const token = localStorage.getItem(this.TOKEN_KEY);
       if (token) {
-        this.currentUser = await this.userRepository.validateToken(token);
+        const user = await this.userRepository.validateToken(token);
+        this.currentUserSubject.next(user);
       }
     }
-    return this.currentUser;
+    return this.currentUserSubject.value;
   }
 
   async isAdmin(): Promise<boolean> {
@@ -78,22 +83,24 @@ export class AuthService {
   }
 
   async updateUserProfile(firstName: string, lastName: string): Promise<User> {
-    if (!this.currentUser) {
+    const currentUser = this.currentUserSubject.value;
+    if (!currentUser) {
       throw new Error('No authenticated user');
     }
-    const updatedUser = this.currentUser.updateProfile(firstName, lastName);
+    const updatedUser = currentUser.updateProfile(firstName, lastName);
     await this.userRepository.save(updatedUser);
-    this.currentUser = updatedUser;
+    this.currentUserSubject.next(updatedUser);
     return updatedUser;
   }
 
   async updateUserPreferences(preferences: UserPreferences): Promise<User> {
-    if (!this.currentUser) {
+    const currentUser = this.currentUserSubject.value;
+    if (!currentUser) {
       throw new Error('No authenticated user');
     }
-    const updatedUser = this.currentUser.updatePreferences(preferences);
+    const updatedUser = currentUser.updatePreferences(preferences);
     await this.userRepository.save(updatedUser);
-    this.currentUser = updatedUser;
+    this.currentUserSubject.next(updatedUser);
     return updatedUser;
   }
 } 

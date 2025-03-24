@@ -13,11 +13,7 @@ export class UserService {
   async register(dto: RegisterUserDto): Promise<UserDto> {
     try {
       const user = await this.authService.register(
-        dto.username,
-        new Email(dto.email),
-        new Password(dto.password),
-        dto.firstName,
-        dto.lastName
+        dto
       );
       return this.toDto(user);
     } catch (error) {
@@ -28,8 +24,7 @@ export class UserService {
   async login(dto: LoginUserDto): Promise<UserDto> {
     try {
       const user = await this.authService.login(
-        new Email(dto.email),
-        dto.password
+        dto
       );
       return this.toDto(user);
     } catch (error) {
@@ -55,22 +50,8 @@ export class UserService {
     if (!user) {
       throw new Error('User not authenticated');
     }
-
-    user.updateProfile(dto.firstName, dto.lastName);
-    return this.toDto(user);
-  }
-
-  async changePassword(dto: ChangePasswordDto): Promise<void> {
-    const user = this.authService.getCurrentUser();
-    if (!user) {
-      throw new Error('User not authenticated');
-    }
-
-    if (!user.validatePassword(dto.currentPassword)) {
-      throw new Error('Current password is incorrect');
-    }
-
-    user.changePassword(new Password(dto.newPassword));
+    const updatedUser = await this.authService.updateUserProfile(dto.firstName, dto.lastName);
+    return this.toDto(updatedUser);
   }
 
   private toDto(user: any): UserDto {

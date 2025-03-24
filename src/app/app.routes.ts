@@ -1,40 +1,43 @@
 import { Routes } from '@angular/router';
-import { AppLayoutComponent } from './infrastructure/ui/layout/app-layout.component';
-import { TripsComponent } from './infrastructure/ui/pages/trips/trips.component';
-import { LoginComponent } from './infrastructure/ui/pages/login/login.component';
-import { RegisterComponent } from './infrastructure/ui/pages/register/register.component';
-import { HomeComponent } from './infrastructure/ui/pages/home/home.component';
-import { ProfileComponent } from './infrastructure/ui/pages/profile/profile.component';
+import { AppLayoutComponent } from './modules/core/layout/app-layout.component';
+import { AuthGuard } from './modules/auth/guards/auth.guard';
 
-export const routes: Routes = [
+export const APP_ROUTES: Routes = [
   {
     path: '',
     component: AppLayoutComponent,
     children: [
       {
         path: '',
-        component: HomeComponent
+        loadComponent: () => import('./modules/home/home.component')
+          .then(m => m.HomeComponent),
+        title: 'Welcome to TravelApp'
       },
       {
         path: 'trips',
-        component: TripsComponent
-      },
-      {
-        path: 'login',
-        component: LoginComponent
-      },
-      {
-        path: 'register',
-        component: RegisterComponent
+        loadChildren: () => import('./modules/trips/trips.module')
+          .then(m => m.TripsModule),
+        title: 'Explore Trips'
       },
       {
         path: 'profile',
-        component: ProfileComponent
-      },
-      {
-        path: '**',
-        redirectTo: ''
+        loadComponent: () => import('./modules/user/profile/profile.component')
+          .then(m => m.ProfileComponent),
+        canActivate: [AuthGuard],
+        title: 'My Profile'
       }
     ]
+  },
+  {
+    path: 'auth',
+    loadChildren: () => import('./modules/auth/auth.module')
+      .then(m => m.AuthModule),
+    title: 'Authentication'
+  },
+  {
+    path: '**',
+    loadComponent: () => import('./modules/core/components/not-found/not-found.component')
+      .then(m => m.NotFoundComponent),
+    title: 'Page Not Found'
   }
 ]; 
