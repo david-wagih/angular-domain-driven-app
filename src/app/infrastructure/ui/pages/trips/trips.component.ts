@@ -113,7 +113,7 @@ import { Price } from '../../../../domain/value-objects/price.value-object';
             <app-trip-card
               *ngFor="let trip of trips"
               [trip]="trip"
-              (bookClick)="onBookTrip($event)"
+              (bookClick)="onBookTrip(trip)"
             ></app-trip-card>
           </div>
 

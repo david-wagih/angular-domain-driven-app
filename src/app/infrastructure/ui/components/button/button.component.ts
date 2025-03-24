@@ -8,17 +8,8 @@ type ButtonSize = 'sm' | 'md' | 'lg';
   selector: 'app-button',
   standalone: true,
   imports: [CommonModule],
-  styleUrls: ['./button.component.css'],
-  template: `
-    <button
-      [class]="buttonClasses"
-      [type]="type"
-      [disabled]="disabled"
-      (click)="buttonClick.emit($event)"
-    >
-      <ng-content></ng-content>
-    </button>
-  `
+  templateUrl: './button.component.html',
+  styleUrls: ['./button.component.css']
 })
 export class ButtonComponent {
   @Input() variant: ButtonVariant = 'primary';

@@ -21,14 +21,28 @@ import { ButtonComponent } from '../components/button/button.component';
           </a>
           
           <div class="nav-links">
+            <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
             <a routerLink="/trips" routerLinkActive="active">Trips</a>
-            <a routerLink="/about" routerLinkActive="active">About</a>
-            <a routerLink="/contact" routerLinkActive="active">Contact</a>
+            <a routerLink="/profile" routerLinkActive="active" *ngIf="isLoggedIn">Profile</a>
           </div>
 
           <div class="nav-actions">
-            <app-button variant="outline" size="sm">Sign In</app-button>
-            <app-button variant="primary" size="sm">Sign Up</app-button>
+            <ng-container *ngIf="!isLoggedIn">
+              <a routerLink="/login">
+                <app-button variant="outline" size="sm">Sign In</app-button>
+              </a>
+              <a routerLink="/register">
+                <app-button variant="primary" size="sm">Sign Up</app-button>
+              </a>
+            </ng-container>
+            <app-button 
+              *ngIf="isLoggedIn" 
+              variant="outline" 
+              size="sm"
+              (buttonClick)="logout()"
+            >
+              Sign Out
+            </app-button>
           </div>
         </div>
       </nav>
@@ -48,9 +62,9 @@ import { ButtonComponent } from '../components/button/button.component';
 
           <div class="footer-section">
             <h4 class="footer-subtitle">Quick Links</h4>
+            <a routerLink="/">Home</a>
             <a routerLink="/trips">All Trips</a>
-            <a routerLink="/about">About Us</a>
-            <a routerLink="/contact">Contact</a>
+            <a routerLink="/profile" *ngIf="isLoggedIn">Profile</a>
           </div>
 
           <div class="footer-section">
@@ -87,4 +101,13 @@ import { ButtonComponent } from '../components/button/button.component';
     </div>
   `
 })
-export class AppLayoutComponent {} 
+export class AppLayoutComponent {
+  // TODO: Replace with actual auth service check
+  isLoggedIn = false;
+
+  logout() {
+    // TODO: Implement actual logout logic
+    console.log('Logging out...');
+    this.isLoggedIn = false;
+  }
+} 
