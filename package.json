@@ -7,7 +7,13 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:angular-domain-driven-app": "node dist/angular-domain-driven-app/server/server.mjs"
+    "serve:ssr:angular-domain-driven-app": "node dist/angular-domain-driven-app/server/server.mjs",
+    "docs:generate": "npx compodoc -p tsconfig.json",
+    "docs:serve": "npx compodoc -p tsconfig.json -s",
+    "docs:coverage": "npx compodoc -p tsconfig.json --coverageTest",
+    "deps:graph": "madge --image graph.svg src/app",
+    "deps:circular": "madge --circular src/app",
+    "ngd": "ngd -p src/tsconfig.app.json -d documentation/dependencies"
   },
   "private": true,
   "dependencies": {
@@ -44,6 +50,11 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.0.15",
-    "typescript": "~5.7.2"
+    "typescript": "~5.7.2",
+    "@compodoc/compodoc": "^1.1.26",
+    "@compodoc/ngd-cli": "^2.1.0",
+    "@compodoc/ngd-core": "^2.1.1",
+    "@compodoc/ngd-transformer": "^2.1.3",
+    "madge": "^8.0.0"
   }
 }
