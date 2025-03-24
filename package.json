@@ -13,7 +13,7 @@
     "docs:coverage": "npx compodoc -p tsconfig.json --coverageTest",
     "deps:graph": "madge --image graph.svg src/app",
     "deps:circular": "madge --circular src/app",
-    "ngd": "ngd -p tsconfig.app.json -d documentation/dependencies"
+    "ngd": "ngd -p tsconfig.json -d documentation/dependencies"
   },
   "private": true,
   "dependencies": {
