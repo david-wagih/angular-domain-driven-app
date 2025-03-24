@@ -1,101 +1,112 @@
-# Angular Domain-Driven Design Application
+# Angular Domain-Driven App
 
-This project demonstrates an Angular application built using Domain-Driven Design (DDD) principles. It includes user authentication, profile management, and a modular architecture that separates domain logic from infrastructure concerns.
-
-## Architecture Overview
-
-The application follows a layered architecture based on DDD:
-
-```
-src/
-├── app/
-│   ├── modules/               # Feature Modules (organized by domain)
-│   │   ├── user/              # User Domain
-│   │   └── auth/              # Auth Domain
-│   ├── core/                  # Core Module (singleton services)
-│   ├── application/           # Application Layer
-│   │   ├── dtos/              # Data Transfer Objects
-│   │   └── services/          # Application Services
-│   ├── domain/                # Domain Layer
-│   │   ├── entities/          # Domain Entities
-│   │   ├── repositories/      # Repository Interfaces
-│   │   ├── services/          # Domain Services
-│   │   ├── exceptions/        # Domain Exceptions
-│   │   ├── events/            # Domain Events
-│   │   └── value-objects/     # Value Objects
-│   └── infrastructure/        # Infrastructure Layer
-│       ├── persistence/       # Repository Implementations
-│       └── ui/                # UI Components
-└── docs/                      # Documentation
-```
-
-## Key DDD Concepts Implemented
-
-1. **Rich Domain Model**: Entities with behavior, not just data
-2. **Value Objects**: Immutable objects representing concepts like Email, UserId, etc.
-3. **Domain Events**: For cross-aggregate communication
-4. **Repositories**: Interfaces in domain layer, implementations in infrastructure
-5. **Domain Services**: Complex operations that don't naturally fit on entities
-6. **Application Services**: Orchestration between UI and domain layer
+A modern Angular application built using Domain-Driven Design principles, showcasing best practices in architecture and development.
 
 ## Features
 
-- **User Management**:
-  - Registration with validation
-  - Authentication and session management
-  - Profile management (address, phone, preferences)
+- Domain-Driven Design architecture
+- Comprehensive documentation
+- Dependency visualization
+- Automated documentation generation
+- Clean architecture implementation
+- Type-safe development
 
-- **Modular Structure**:
-  - Core module for singletons
-  - Feature modules for each domain
-  - Lazy loading for better performance
+## Documentation
 
-## Getting Started
+This project uses several tools for documentation and dependency visualization:
 
-### Prerequisites
+1. **API Documentation**
+   - Generated using Compodoc
+   - Available at: [GitHub Pages](https://david-wagih.github.io/angular-domain-driven-app/)
+   - Local access: `http://localhost:8080` (after running `npm run docs:serve`)
 
-- Node.js (v16+)
-- npm (v8+)
+2. **Dependency Graphs**
+   - Generated using Madge and NgD
+   - Visual representation of module dependencies
+   - Located in `documentation/dependencies`
 
-### Installation
+3. **Architecture Documentation**
+   - Located in `docs/architecture`
+   - Covers domain model and technical architecture
+   - Includes design decisions and patterns
 
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/angular-domain-driven-app.git
+## Quick Start
 
-# Navigate to project directory
-cd angular-domain-driven-app
+1. **Installation**
+   ```bash
+   git clone https://github.com/david-wagih/angular-domain-driven-app.git
+   cd angular-domain-driven-app
+   npm install
+   ```
 
-# Install dependencies
-npm install
+2. **Development Server**
+   ```bash
+   npm start
+   ```
+   Navigate to `http://localhost:4200`
 
-# Start development server
-npm start
+3. **Documentation**
+   ```bash
+   # Generate documentation
+   npm run docs:generate
+
+   # Serve documentation
+   npm run docs:serve
+   ```
+
+4. **Dependency Visualization**
+   ```bash
+   # Generate dependency graph
+   npm run deps:graph
+
+   # Check for circular dependencies
+   npm run deps:circular
+   ```
+
+## Project Structure
+
+```
+angular-domain-driven-app/
+├── src/
+│   ├── app/
+│   │   ├── domain/         # Domain models and interfaces
+│   │   ├── application/    # Use cases and application services
+│   │   ├── infrastructure/ # External services and implementations
+│   │   └── presentation/   # UI components and pages
+│   ├── assets/            # Static assets
+│   └── environments/      # Environment configurations
+├── docs/                  # Documentation
+├── e2e/                  # End-to-end tests
+└── README.md             # Project overview
 ```
 
-Visit `http://localhost:4200/` to see the application.
+## Available Scripts
 
-## Development Guidelines
+- `npm start` - Start development server
+- `npm run build` - Build production version
+- `npm run test` - Run unit tests
+- `npm run e2e` - Run end-to-end tests
+- `npm run lint` - Run linting
+- `npm run docs:generate` - Generate documentation
+- `npm run docs:serve` - Serve documentation
+- `npm run deps:graph` - Generate dependency graph
+- `npm run deps:circular` - Check for circular dependencies
 
-See the [ADDING_FEATURES.md](./docs/ADDING_FEATURES.md) document for guidelines on how to add new features while adhering to the DDD principles.
+## Contributing
 
-## Key Technical Decisions
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-1. **Local Storage Persistence**: For simplicity, the application uses localStorage for persistence, but the architecture allows for easy replacement with real backend services.
+## Documentation
 
-2. **Module Organization**: Feature modules by domain with lazy loading.
+For detailed documentation, please see:
+- [Architecture Overview](docs/architecture/overview.md)
+- [Domain Model](docs/architecture/domain-model.md)
+- [Getting Started Guide](docs/development/getting-started.md)
 
-3. **Core Module**: Singleton services like repositories are provided through the Core module.
+## License
 
-4. **Event-Driven Communication**: Domain events for communication between bounded contexts.
-
-5. **Standalone Components**: Leveraging Angular's standalone components where appropriate for better tree-shaking.
-
-## Future Improvements
-
-- Server-side rendering (SSR) support
-- Integration with a real backend
-- More sophisticated authentication
-- Enhanced error handling
-- Unit and integration tests
-- CI/CD pipeline
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. 
