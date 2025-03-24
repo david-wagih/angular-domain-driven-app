@@ -13,7 +13,6 @@
   "disableProtected": false,
   "disableInternal": false,
   "disableLifeCycleHooks": false,
-  "customFavicon": "src/favicon.ico",
   "gaID": "",
   "includeOnly": [
     "src/app"
