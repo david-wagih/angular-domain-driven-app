@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { PhoneNumberDto } from '../../../../application/dtos/profile.dto';
+import { PhoneNumberDto } from '../../../user/data-access/dtos/profile.dto';
 
 @Component({
   selector: 'app-phone-number-form',

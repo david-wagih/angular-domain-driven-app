@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { LoginUserDto, RegisterUserDto } from '../../../application/dtos/user.dto';
+import { LoginUserDto, RegisterUserDto } from '../data-access/dtos/user.dto';
 import { AuthResponse } from '../domain/models/auth.model';
 
 @Injectable({

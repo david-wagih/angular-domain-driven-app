@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthFacade } from '../../../domain/facades/auth.facade';
 import { firstValueFrom } from 'rxjs';
+import { AuthFacade } from '../domain/facades/auth.facade';
 
 @Injectable({
   providedIn: 'root'

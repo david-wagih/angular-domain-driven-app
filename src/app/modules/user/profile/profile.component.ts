@@ -4,9 +4,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AddressFormComponent } from '../../core/components/address-form/address-form.component';
 import { PhoneNumberFormComponent } from '../../core/components/phone-number-form/phone-number-form.component';
 import { PreferencesFormComponent } from '../../core/components/preferences-form/preferences-form.component';
-import { AddressDto, PhoneNumberDto, UserPreferencesDto } from '../../../application/dtos/profile.dto';
 import { ProfileService } from '../../../application/services/profile.service';
-import { ProfileDto } from '../../../application/dtos/profile.dto';
+import { AddressDto, PhoneNumberDto, ProfileDto, UserPreferencesDto } from '../data-access/dtos/profile.dto';
 
 @Component({
   selector: 'app-profile',

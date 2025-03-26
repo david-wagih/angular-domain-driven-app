@@ -1,9 +1,9 @@
 import { Injectable, Inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { User } from '../entities/user.entity';
-import { USER_REPOSITORY, UserRepository } from '../repositories/user.repository';
-import { UserPreferences } from '../value-objects/user-preferences.value-object';
-import { RegisterUserDto, LoginUserDto } from '../../application/dtos/user.dto';
+import { User } from '../../../../domain/entities/user.entity';
+import { USER_REPOSITORY, UserRepository } from '../../../../domain/repositories/user.repository';
+import { UserPreferences } from '../../../../domain/value-objects/user-preferences.value-object';
+import { LoginUserDto, RegisterUserDto } from '../../data-access/dtos/user.dto';
 @Injectable({
   providedIn: 'root'
 })

@@ -4,7 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { User } from '../../domain/entities/user.entity';
 import { USER_REPOSITORY, UserRepository } from '../../domain/repositories/user.repository';
 import { UserPreferences } from '../../domain/value-objects/user-preferences.value-object';
-import { RegisterUserDto, LoginUserDto } from '../dtos/user.dto';
+import { RegisterUserDto, LoginUserDto } from '../../modules/auth/data-access/dtos/user.dto';
 
 @Injectable({
   providedIn: 'root'

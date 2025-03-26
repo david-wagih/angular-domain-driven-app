@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AddressDto } from '../../../../application/dtos/profile.dto';
+import { AddressDto } from '../../../user/data-access/dtos/profile.dto';
 
 @Component({
   selector: 'app-address-form',

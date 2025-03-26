@@ -2,7 +2,7 @@ import { InjectionToken } from '@angular/core';
 import { User } from '../entities/user.entity';
 import { UserId } from '../value-objects/user-id.value-object';
 import { Email } from '../value-objects/email.value-object';
-import { RegisterUserDto, LoginUserDto } from '../../application/dtos/user.dto';
+import { RegisterUserDto, LoginUserDto } from '../../modules/auth/data-access/dtos/user.dto';
 export interface UserRepository {
   findById(id: UserId): Promise<User | null>;
   findByEmail(email: Email): Promise<User | null>;

@@ -1,9 +1,9 @@
 import { Injectable, Inject } from '@angular/core';
-import { AuthService } from '../../domain/services/auth.service';
+import { AuthService } from '../../modules/auth/domain/services/auth.service';
 import { Address } from '../../domain/value-objects/address.value-object';
 import { PhoneNumber } from '../../domain/value-objects/phone-number.value-object';
 import { UserPreferences } from '../../domain/value-objects/user-preferences.value-object';
-import { AddressDto, PhoneNumberDto, UserPreferencesDto, ProfileDto } from '../dtos/profile.dto';
+import { AddressDto, PhoneNumberDto, UserPreferencesDto, ProfileDto } from '../../modules/user/data-access/dtos/profile.dto';
 import { USER_REPOSITORY, UserRepository } from '../../domain/repositories/user.repository';
 
 @Injectable({

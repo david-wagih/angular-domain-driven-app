@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { AuthService } from '../services/auth.service';
-import { User } from '../entities/user.entity';
-import { UserPreferences, NotificationPreferences, ThemePreferences } from '../value-objects/user-preferences.value-object';
-import { LoginUserDto, RegisterUserDto } from '../../application/dtos/user.dto';
-
+import { User } from '../../../../domain/entities/user.entity';
+import { UserPreferences, NotificationPreferences, ThemePreferences } from '../../../../domain/value-objects/user-preferences.value-object';
+import { LoginUserDto, RegisterUserDto } from '../../data-access/dtos/user.dto';
 interface AuthState {
   user: User | null;
   loading: boolean;

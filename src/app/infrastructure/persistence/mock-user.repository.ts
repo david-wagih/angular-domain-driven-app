@@ -4,7 +4,7 @@ import { UserRepository } from '../../domain/repositories/user.repository';
 import { UserId } from '../../domain/value-objects/user-id.value-object';
 import { Email } from '../../domain/value-objects/email.value-object';
 import { Password } from '../../domain/value-objects/password.value-object';
-import { RegisterUserDto, LoginUserDto } from '../../application/dtos/user.dto';
+import { RegisterUserDto, LoginUserDto } from '../../modules/auth/data-access/dtos/user.dto';
 @Injectable({
   providedIn: 'root'
 })

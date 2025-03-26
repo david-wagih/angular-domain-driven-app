@@ -1,8 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuthFacade } from '../../../../../domain/facades/auth.facade';
-import { RegisterUserDto } from '../../../../../application/dtos/user.dto';
+import { AuthFacade } from '../../../domain/facades/auth.facade';
 import { RegisterComponent } from '../../../ui/register.component';
+import { RegisterUserDto } from '../../../data-access/dtos/user.dto';
 
 @Component({
   selector: 'app-register-page',

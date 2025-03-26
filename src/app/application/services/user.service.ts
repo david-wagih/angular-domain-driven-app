@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { AuthService } from '../../domain/services/auth.service';
+import { AuthService } from '../../modules/auth/domain/services/auth.service';
 import { Email } from '../../domain/value-objects/email.value-object';
 import { Password } from '../../domain/value-objects/password.value-object';
-import { UserDto, RegisterUserDto, LoginUserDto, UpdateProfileDto, ChangePasswordDto } from '../dtos/user.dto';
+import { UserDto, RegisterUserDto, LoginUserDto, UpdateProfileDto, ChangePasswordDto } from '../../modules/auth/data-access/dtos/user.dto';
 
 @Injectable({
   providedIn: 'root'
