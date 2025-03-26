@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { Observable, tap, catchError, throwError } from 'rxjs';
 import { AuthRepository } from './auth.repository';
 import { AuthStore } from './auth.store';
-import { LoginUserDto, RegisterUserDto } from '../../../application/dtos/user.dto';
 import { AuthResponse } from '../domain/models/auth.model';
+import { LoginUserDto, RegisterUserDto } from './dtos/user.dto';
 
 @Injectable({
   providedIn: 'root'

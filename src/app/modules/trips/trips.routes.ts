@@ -1,27 +1,18 @@
 import { Routes } from '@angular/router';
-import { TripFacade } from '../../domain/facades/trip.facade';
-import { TripApplicationService } from '../../application/services/trip.application.service';
-import { TripService } from '../../domain/services/trip.service';
-import { TRIP_REPOSITORY } from '../../domain/repositories/trip.repository';
-import { MockTripRepository } from '../../infrastructure/persistence/mock-trip.repository';
+import { TripListComponent } from './feature-list/components/trip-list/trip-list.component';
+import { TripDetailsComponent } from './feature-details/components/trip-details/trip-details.component';
 
 export const TRIPS_ROUTES: Routes = [
   {
     path: '',
-    providers: [
-      TripFacade,
-      TripApplicationService,
-      TripService,
-      {
-        provide: TRIP_REPOSITORY,
-        useClass: MockTripRepository
-      }
-    ],
     children: [
       {
         path: '',
-        loadComponent: () => import('./components/trip-list/trip-list.component')
-          .then(m => m.TripListComponent)
+        component: TripListComponent
+      },
+      {
+        path: ':id',
+        component: TripDetailsComponent
       }
     ]
   }

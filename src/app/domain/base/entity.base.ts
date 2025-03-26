@@ -1,3 +1,5 @@
+import { DomainEvent } from './event.base';
+
 export interface IEntity {
   id: string;
   createdAt: Date;
@@ -8,6 +10,7 @@ export abstract class Entity implements IEntity {
   id!: string;
   createdAt!: Date;
   updatedAt!: Date;
+  private domainEvents: DomainEvent[] = [];
 
   constructor(partial: Partial<Entity>) {
     Object.assign(this, partial);
@@ -16,6 +19,20 @@ export abstract class Entity implements IEntity {
   equals(entity: Entity): boolean {
     if (!(entity instanceof Entity)) return false;
     return this.id === entity.id;
+  }
+
+  addDomainEvent(event: DomainEvent): void {
+    this.domainEvents.push(event);
+  }
+
+  clearDomainEvents(): DomainEvent[] {
+    const events = [...this.domainEvents];
+    this.domainEvents = [];
+    return events;
+  }
+
+  getDomainEvents(): DomainEvent[] {
+    return [...this.domainEvents];
   }
 }
 

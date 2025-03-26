@@ -1,16 +1,16 @@
 import { Injectable, Inject } from '@angular/core';
-import { TripRepository } from '../repositories/trip.repository';
-import { Location } from '../value-objects/location.vo';
-import { DateRange } from '../value-objects/date-range.vo';
-import { Price } from '../value-objects/price.vo';
+import { TripRepository } from '../../domain/repositories/trip.repository';
+import { Location } from '../../domain/value-objects/location.vo';
+import { DateRange } from '../../domain/value-objects/date-range.vo';
+import { Price } from '../../domain/value-objects/price.vo';
 import { TRIP_REPOSITORY } from '../../../../domain/repositories/trip.repository';
 import { TripId } from '../../../../domain/value-objects/trip-id.value-object';
-import { Trip } from '../entities/trip.entity';
+import { Trip } from '../../domain/entities/trip.entity';
 
 @Injectable({
   providedIn: 'root'
 })
-export class TripService {
+export class TripApplicationService {
   constructor(
     @Inject(TRIP_REPOSITORY) private readonly tripRepository: TripRepository
   ) {}

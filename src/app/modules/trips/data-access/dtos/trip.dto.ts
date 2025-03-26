@@ -1,15 +1,32 @@
+import { TripCategory } from '../../shared/types/trip.types';
+
 export interface TripDto {
   id: string;
   title: string;
   description: string;
   imageUrl: string;
-  location: LocationDto;
-  dateRange: DateRangeDto;
-  price: PriceDto;
+  location: {
+    city: string;
+    country: string;
+    coordinates?: {
+      lat: number;
+      lng: number;
+    };
+  };
+  dateRange: {
+    startDate: string;
+    endDate: string;
+  };
+  price: {
+    amount: number;
+    currency: string;
+  };
   maxParticipants: number;
   currentParticipants: number;
   rating: number;
-  tags: string[];
+  tags: TripCategory[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface LocationDto {
