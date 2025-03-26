@@ -1,297 +1,274 @@
 # Domain Model
 
-This document describes the core domain model of our travel booking application.
+This document describes the domain model implementation in our Angular v19 application using Domain-Driven Design (DDD) principles.
 
-## Core Concepts
+## Domain Structure
 
-### 1. Trip
-The central entity representing a travel package.
+The domain layer is split into two levels:
 
-```typescript
-export class Trip {
-  private constructor(
-    private id: TripId,
-    private title: string,
-    private description: string,
-    private imageUrl: string,
-    private location: Location,
-    private dateRange: DateRange,
-    private price: Price,
-    private maxParticipants: number,
-    private currentParticipants: number,
-    private rating: number,
-    private tags: string[]
-  ) {}
+1. **Shared Domain** (`src/app/domain/`)
+   - Base entities and interfaces
+   - Shared value objects
+   - Cross-cutting domain concepts
 
-  // Factory method
-  static create(
-    title: string,
-    description: string,
-    imageUrl: string,
-    location: Location,
-    dateRange: DateRange,
-    price: Price,
-    maxParticipants: number,
-    tags: string[]
-  ): Trip {
-    return new Trip(
-      TripId.generate(),
-      title,
-      description,
-      imageUrl,
-      location,
-      dateRange,
-      price,
-      maxParticipants,
-      0,
-      0,
-      tags
-    );
-  }
+2. **Feature-Specific Domains** (`src/app/modules/[feature]/domain/`)
+   - Feature-specific entities
+   - Feature-specific value objects
+   - Feature-specific business logic
 
-  // Business logic methods
-  hasAvailableSpots(): boolean {
-    return this.currentParticipants < this.maxParticipants;
-  }
-}
-```
+## Base Domain Classes
 
-### 2. User
-Represents a system user with authentication and profile information.
+### 1. Entity Base
+All domain entities extend this base class:
 
 ```typescript
-export class User {
-  private constructor(
-    private id: UserId,
-    private email: Email,
-    private password: Password,
-    private username: string,
-    private firstName: string,
-    private lastName: string,
-    private role: string,
-    private preferences: UserPreferences
-  ) {}
-
-  // Factory method
-  static create(
-    email: Email,
-    password: Password,
-    username: string,
-    firstName: string,
-    lastName: string,
-    role: string
-  ): User {
-    return new User(
-      UserId.generate(),
-      email,
-      password,
-      username,
-      firstName,
-      lastName,
-      role,
-      UserPreferences.createDefault()
-    );
-  }
-
-  // Business logic methods
-  isAdmin(): boolean {
-    return this.role === 'admin';
-  }
-}
-```
-
-## Value Objects
-
-### 1. Location
-Represents a travel destination.
-
-```typescript
-export class Location {
-  private constructor(
-    private readonly city: string,
-    private readonly country: string,
-    private readonly coordinates?: { lat: number; lng: number }
-  ) {}
-
-  static create(
-    city: string,
-    country: string,
-    coordinates?: { lat: number; lng: number }
-  ): Location {
-    if (!city || !country) {
-      throw new Error('City and country are required');
-    }
-    return new Location(city, country, coordinates);
-  }
-
-  format(): string {
-    return `${this.city}, ${this.country}`;
-  }
-}
-```
-
-### 2. DateRange
-Represents a time period for a trip.
-
-```typescript
-export class DateRange {
-  private constructor(
-    private readonly startDate: Date,
-    private readonly endDate: Date
-  ) {}
-
-  static create(startDate: Date, endDate: Date): DateRange {
-    if (startDate >= endDate) {
-      throw new Error('Start date must be before end date');
-    }
-    return new DateRange(startDate, endDate);
-  }
-
-  getDurationInDays(): number {
-    return Math.ceil(
-      (this.endDate.getTime() - this.startDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
-  }
-}
-```
-
-### 3. Price
-Represents monetary value.
-
-```typescript
-export class Price {
-  private constructor(
-    private readonly amount: number,
-    private readonly currency: string
-  ) {}
-
-  static create(amount: number, currency: string): Price {
-    if (amount < 0) {
-      throw new Error('Price amount cannot be negative');
-    }
-    return new Price(amount, currency);
-  }
-
-  format(): string {
-    return `${this.amount} ${this.currency}`;
-  }
-}
-```
-
-## Repositories
-
-### 1. TripRepository
-Manages trip persistence.
-
-```typescript
-export interface TripRepository {
-  findById(id: TripId): Promise<Trip | null>;
-  findAll(): Promise<Trip[]>;
-  save(trip: Trip): Promise<void>;
-  delete(id: TripId): Promise<void>;
-  exists(id: TripId): Promise<boolean>;
-}
-```
-
-### 2. UserRepository
-Manages user persistence and authentication.
-
-```typescript
-export interface UserRepository {
-  findById(id: UserId): Promise<User | null>;
-  findByEmail(email: Email): Promise<User | null>;
-  save(user: User): Promise<void>;
-  delete(id: UserId): Promise<void>;
-  exists(id: UserId): Promise<boolean>;
-  authenticate(credentials: LoginUserDto): Promise<{ user: User; token: string } | null>;
-  validateToken(token: string): Promise<User | null>;
-}
-```
-
-## Domain Services
-
-### 1. TripService
-Implements trip-related business logic.
-
-```typescript
-export class TripService {
-  constructor(private tripRepository: TripRepository) {}
-
-  async searchTrips(
-    location?: string,
-    startDate?: Date,
-    endDate?: Date,
-    maxPrice?: number
-  ): Promise<Trip[]> {
-    const trips = await this.tripRepository.findAll();
-    return trips.filter(/* filtering logic */);
-  }
-
-  async bookTrip(tripId: TripId): Promise<void> {
-    const trip = await this.tripRepository.findById(tripId);
-    if (!trip) {
-      throw new Error('Trip not found');
-    }
-    if (!trip.hasAvailableSpots()) {
-      throw new Error('No available spots');
-    }
-    // Booking logic
-  }
-}
-```
-
-## Application Services
-
-### 1. TripApplicationService
-Orchestrates trip-related use cases.
-
-```typescript
-export class TripApplicationService {
-  constructor(private tripService: TripService) {}
-
-  async searchTrips(searchDto: SearchTripsDto): Promise<TripDto[]> {
-    const trips = await this.tripService.searchTrips(
-      searchDto.location?.toString(),
-      searchDto.startDate,
-      searchDto.endDate,
-      searchDto.maxPrice?.amount
-    );
-    return trips.map(trip => this.mapToDto(trip));
-  }
-}
-```
-
-## DTOs
-
-### 1. TripDto
-Data transfer object for trips.
-
-```typescript
-export interface TripDto {
+export interface IEntity {
   id: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  location: LocationDto;
-  dateRange: DateRangeDto;
-  price: PriceDto;
-  maxParticipants: number;
-  currentParticipants: number;
-  rating: number;
-  tags: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export abstract class Entity implements IEntity {
+  id!: string;
+  createdAt!: Date;
+  updatedAt!: Date;
+
+  constructor(partial: Partial<Entity>) {
+    Object.assign(this, partial);
+  }
+
+  equals(entity: Entity): boolean {
+    if (!(entity instanceof Entity)) return false;
+    return this.id === entity.id;
+  }
 }
 ```
 
-### 2. UserDto
-Data transfer object for users.
+### 2. Aggregate Root
+For entities that are aggregate roots:
 
 ```typescript
-export interface UserDto {
-  id: string;
+export interface IAggregateRoot extends IEntity {
+  version: number;
+}
+
+export abstract class AggregateRoot extends Entity implements IAggregateRoot {
+  version: number = 1;
+
+  constructor(partial: Partial<AggregateRoot>) {
+    super(partial);
+  }
+}
+```
+
+## Feature Domain Example: Auth Module
+
+### 1. Auth Entity
+```typescript
+export class User extends AggregateRoot {
   email: string;
-  username: string;
-  firstName: string;
-  lastName: string;
-  role: string;
-  preferences: UserPreferencesDto;
-} 
+  name: string;
+  role: UserRole;
+
+  private constructor(props: UserProps) {
+    super(props);
+    this.email = props.email;
+    this.name = props.name;
+    this.role = props.role;
+  }
+
+  static create(props: UserProps): User {
+    return new User(props);
+  }
+
+  hasPermission(permission: Permission): boolean {
+    return this.role.hasPermission(permission);
+  }
+}
+```
+
+### 2. Auth Value Objects
+```typescript
+export class Email {
+  private constructor(private readonly value: string) {}
+
+  static create(email: string): Either<ValidationError, Email> {
+    if (!email.includes('@')) {
+      return left(new ValidationError('Invalid email format'));
+    }
+    return right(new Email(email));
+  }
+
+  getValue(): string {
+    return this.value;
+  }
+}
+```
+
+### 3. Auth Domain Service
+```typescript
+@Injectable()
+export class AuthDomainService {
+  constructor(private userRepository: UserRepository) {}
+
+  async validateCredentials(email: Email, password: Password): Promise<boolean> {
+    const user = await this.userRepository.findByEmail(email);
+    if (!user) return false;
+    return user.validatePassword(password);
+  }
+
+  createAccessToken(user: User): string {
+    return jwt.sign(
+      { 
+        id: user.id,
+        email: user.email,
+        role: user.role.value
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+  }
+}
+```
+
+## Domain Events
+
+### 1. Base Event
+```typescript
+export interface DomainEvent {
+  occurredOn: Date;
+  eventName: string;
+}
+
+export abstract class BaseDomainEvent implements DomainEvent {
+  public readonly occurredOn: Date;
+  public abstract readonly eventName: string;
+
+  constructor() {
+    this.occurredOn = new Date();
+  }
+}
+```
+
+### 2. Feature-Specific Events
+```typescript
+export class UserCreatedEvent extends BaseDomainEvent {
+  public readonly eventName = 'UserCreated';
+
+  constructor(public readonly user: User) {
+    super();
+  }
+}
+```
+
+## Repository Pattern
+
+### 1. Base Repository
+```typescript
+export abstract class BaseRepository<T extends Entity> {
+  abstract findById(id: string): Observable<T>;
+  abstract findAll(): Observable<T[]>;
+  abstract save(entity: T): Observable<T>;
+  abstract delete(id: string): Observable<void>;
+}
+```
+
+### 2. Feature Repository Implementation
+```typescript
+@Injectable()
+export class AuthRepository extends BaseRepository<User> {
+  constructor(private http: HttpClient) {
+    super();
+  }
+
+  findById(id: string): Observable<User> {
+    return this.http.get<UserDto>(`/api/users/${id}`).pipe(
+      map(dto => User.create(dto))
+    );
+  }
+
+  // ... other implementations
+}
+```
+
+## Domain Facades
+
+Domain facades coordinate between the domain and application layers:
+
+```typescript
+@Injectable()
+export class AuthFacade {
+  constructor(
+    private authDomainService: AuthDomainService,
+    private authRepository: AuthRepository,
+    private eventBus: EventBus
+  ) {}
+
+  async login(credentials: LoginCredentials): Promise<Either<AuthError, User>> {
+    const emailOrError = Email.create(credentials.email);
+    const passwordOrError = Password.create(credentials.password);
+
+    if (emailOrError.isLeft() || passwordOrError.isLeft()) {
+      return left(new ValidationError('Invalid credentials format'));
+    }
+
+    const isValid = await this.authDomainService.validateCredentials(
+      emailOrError.value,
+      passwordOrError.value
+    );
+
+    if (!isValid) {
+      return left(new AuthError('Invalid credentials'));
+    }
+
+    const user = await this.authRepository.findByEmail(emailOrError.value);
+    const token = this.authDomainService.createAccessToken(user);
+
+    this.eventBus.publish(new UserLoggedInEvent(user));
+
+    return right(user);
+  }
+}
+```
+
+## Testing Domain Logic
+
+### 1. Entity Tests
+```typescript
+describe('User', () => {
+  it('should create a valid user', () => {
+    const userProps = {
+      email: 'test@example.com',
+      name: 'Test User',
+      role: UserRole.create('USER')
+    };
+
+    const user = User.create(userProps);
+
+    expect(user).toBeDefined();
+    expect(user.email).toBe(userProps.email);
+  });
+
+  it('should validate permissions correctly', () => {
+    const user = User.create({
+      role: UserRole.create('ADMIN')
+    });
+
+    expect(user.hasPermission('READ_USERS')).toBe(true);
+  });
+});
+```
+
+### 2. Value Object Tests
+```typescript
+describe('Email', () => {
+  it('should create a valid email', () => {
+    const emailOrError = Email.create('test@example.com');
+    expect(emailOrError.isRight()).toBe(true);
+  });
+
+  it('should reject invalid email format', () => {
+    const emailOrError = Email.create('invalid-email');
+    expect(emailOrError.isLeft()).toBe(true);
+  });
+}); 

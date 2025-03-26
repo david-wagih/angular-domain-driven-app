@@ -1,6 +1,232 @@
 # Architecture Overview
 
-This document provides an overview of the application's architecture, which follows Domain-Driven Design (DDD) principles and Clean Architecture patterns.
+This document provides an overview of the application's architecture, which follows Domain-Driven Design (DDD) principles and Clean Architecture patterns in Angular v19.
+
+## Project Structure
+
+The application is organized into two main areas:
+1. Cross-cutting concerns at the application level
+2. Feature-specific modules
+
+### Application-Level Structure (`src/app/`)
+
+```
+src/app/
+├── domain/                 # Shared domain concepts
+│   ├── base/              # Base entities and interfaces
+│   └── value-objects/     # Shared value objects
+├── application/           # Cross-cutting application concerns
+│   └── dtos/             # Shared DTOs and interfaces
+└── infrastructure/        # Technical capabilities
+    ├── api/              # Base API configuration
+    ├── auth/             # Core auth infrastructure
+    ├── guards/           # Shared guards
+    ├── interceptors/     # Global interceptors
+    ├── logging/          # Application-wide logging
+    ├── persistence/      # Global persistence
+    └── storage/          # Shared storage utilities
+```
+
+### Feature Module Structure (`src/app/modules/`)
+
+Each feature module follows this structure:
+```
+modules/feature-name/
+├── data-access/          # State management and API communication
+│   ├── dtos/            # Feature-specific DTOs
+│   ├── repository/      # Data access implementation
+│   ├── store/           # State management
+│   └── service/         # Data services
+├── domain/              # Feature-specific domain logic
+│   ├── entities/        # Domain entities
+│   ├── value-objects/   # Domain value objects
+│   ├── services/        # Domain services
+│   └── facades/         # Domain facades
+├── feature-*/           # Specific features within the module
+│   └── components/      # Feature components
+├── ui/                  # Presentational components
+│   └── components/      # Shared UI components
+└── shared/              # Shared utilities and types
+```
+
+## Base Classes and Interfaces
+
+### Domain Layer Base Classes
+
+```typescript
+// Base Entity
+export interface IEntity {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export abstract class Entity implements IEntity {
+  id!: string;
+  createdAt!: Date;
+  updatedAt!: Date;
+
+  constructor(partial: Partial<Entity>) {
+    Object.assign(this, partial);
+  }
+
+  equals(entity: Entity): boolean {
+    if (!(entity instanceof Entity)) return false;
+    return this.id === entity.id;
+  }
+}
+
+// Aggregate Root
+export interface IAggregateRoot extends IEntity {
+  version: number;
+}
+
+export abstract class AggregateRoot extends Entity implements IAggregateRoot {
+  version: number = 1;
+}
+```
+
+### Application Layer DTOs
+
+```typescript
+// Base DTOs
+export interface BaseDto {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export interface ApiResponse<T> {
+  data: T;
+  message?: string;
+  success: boolean;
+}
+
+export interface ErrorResponse {
+  message: string;
+  code: string;
+  errors?: Record<string, string[]>;
+}
+```
+
+## Key Design Patterns
+
+### 1. Repository Pattern
+Each feature module implements its own repository that extends the base repository:
+
+```typescript
+export abstract class BaseRepository<T extends Entity> {
+  abstract findById(id: string): Observable<T>;
+  abstract findAll(): Observable<T[]>;
+  abstract save(entity: T): Observable<T>;
+  abstract delete(id: string): Observable<void>;
+}
+```
+
+### 2. Facade Pattern
+Feature modules use facades to coordinate between UI and domain:
+
+```typescript
+@Injectable()
+export class FeatureFacade {
+  private state$ = new BehaviorSubject<FeatureState>(initialState);
+  
+  constructor(
+    private repository: FeatureRepository,
+    private service: FeatureService
+  ) {}
+
+  // State selectors
+  select = {
+    data: () => this.state$.pipe(map(state => state.data)),
+    loading: () => this.state$.pipe(map(state => state.loading))
+  };
+
+  // Commands
+  async loadData(): Promise<void> {
+    this.updateState({ loading: true });
+    try {
+      const data = await this.service.getData();
+      this.updateState({ data, loading: false });
+    } catch (error) {
+      this.updateState({ error, loading: false });
+    }
+  }
+
+  private updateState(partial: Partial<FeatureState>): void {
+    this.state$.next({ ...this.state$.value, ...partial });
+  }
+}
+```
+
+### 3. Store Pattern
+Feature-specific state management using RxJS:
+
+```typescript
+@Injectable()
+export class FeatureStore {
+  private state$ = new BehaviorSubject<FeatureState>(initialState);
+
+  // Selectors
+  select = {
+    state: () => this.state$.asObservable(),
+    data: () => this.state$.pipe(map(state => state.data))
+  };
+
+  // Actions
+  setData(data: any): void {
+    this.state$.next({ ...this.state$.value, data });
+  }
+}
+```
+
+## Module Communication
+
+1. **Event-based Communication**:
+   - Domain events for cross-module communication
+   - RxJS subjects for state updates
+
+2. **Shared Services**:
+   - Infrastructure services for cross-cutting concerns
+   - Shared utilities and helpers
+
+## Testing Strategy
+
+1. **Unit Tests**:
+   - Domain entities and value objects
+   - Services and facades
+   - UI components
+
+2. **Integration Tests**:
+   - Feature module integration
+   - API communication
+   - State management
+
+3. **E2E Tests**:
+   - User flows
+   - Critical paths
+
+## Future Improvements
+
+1. **Micro-frontends**:
+   - Module federation
+   - Independent deployments
+
+2. **Performance**:
+   - State management optimization
+   - Lazy loading strategies
+
+3. **Developer Experience**:
+   - Generator schematics
+   - Documentation improvements
 
 ## Architectural Layers
 
@@ -32,51 +258,6 @@ User interface components:
 - **Pages**: Route components
 - **Facades**: UI state management (e.g., `TripFacade`)
 - **Guards**: Route protection
-
-## Key Design Patterns
-
-### 1. Facade Pattern
-Used to provide a simplified interface to complex subsystems:
-```typescript
-export class TripFacade {
-  private tripsSubject = new BehaviorSubject<TripDto[]>([]);
-  public trips$ = this.tripsSubject.asObservable();
-  
-  constructor(private tripApplicationService: TripApplicationService) {}
-  
-  async searchTrips(criteria: SearchTripsDto): Promise<void> {
-    const trips = await this.tripApplicationService.searchTrips(criteria);
-    this.tripsSubject.next(trips);
-  }
-}
-```
-
-### 2. Repository Pattern
-Abstracts data persistence:
-```typescript
-export interface TripRepository {
-  findById(id: TripId): Promise<Trip | null>;
-  findAll(): Promise<Trip[]>;
-  save(trip: Trip): Promise<void>;
-  delete(id: TripId): Promise<void>;
-}
-```
-
-### 3. Value Objects
-Encapsulate domain concepts:
-```typescript
-export class Location {
-  private constructor(
-    private readonly city: string,
-    private readonly country: string,
-    private readonly coordinates?: { lat: number; lng: number }
-  ) {}
-
-  static create(city: string, country: string, coordinates?: { lat: number; lng: number }): Location {
-    return new Location(city, country, coordinates);
-  }
-}
-```
 
 ## Authentication Flow
 
