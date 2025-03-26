@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UserService } from '../../../../application/services/user.service';
-import { RegisterUserDto } from '../../../../application/dtos/user.dto';
+import { RegisterUserDto } from '../../../application/dtos/user.dto';
+import { UserService } from '../../../application/services/user.service';
 
 @Component({
   selector: 'app-register',

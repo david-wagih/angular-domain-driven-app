@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { LoginComponent } from '../../components/login/login.component';
-import { AuthFacade } from '../../../../domain/facades/auth.facade';
-import { LoginUserDto } from '../../../../application/dtos/user.dto';
+import { LoginComponent } from '../../../ui/login.component';
+import { AuthFacade } from '../../../../../domain/facades/auth.facade';
+import { LoginUserDto } from '../../../../../application/dtos/user.dto';
 @Component({
   selector: 'app-login-page',
   standalone: true,

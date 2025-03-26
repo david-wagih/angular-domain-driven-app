@@ -1,34 +1,39 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { authRoutes } from './auth.routes';
-import { AuthService } from '../../application/services/auth.service';
-import { LoginPageComponent } from './containers/login-page/login-page.component';
-import { RegisterPageComponent } from './containers/register-page/register-page.component';
+
+// Data Access
+import { AuthRepository } from './data-access/auth.repository';
+import { AuthService } from './data-access/auth.service';
+import { AuthStore } from './data-access/auth.store';
+
+// Feature Modules
+import { LoginPageComponent } from './feature-login/components/login-page/login-page.component';
+import { RegisterPageComponent } from './feature-register/components/register-page/register-page.component';
 
 /**
  * Auth Module - Contains all authentication-related functionality
+ * Follows DDD architecture with feature-based organization
  */
 @NgModule({
-  declarations: [],
   imports: [
     CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
     RouterModule.forChild(authRoutes),
     LoginPageComponent,
     RegisterPageComponent
   ],
   providers: [
+    AuthRepository,
     AuthService,
-    { 
-      provide: HTTP_INTERCEPTORS, 
-      useClass: AuthInterceptor, 
-      multi: true 
+    AuthStore,
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
     }
   ]
 })
