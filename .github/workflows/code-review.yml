@@ -16,4 +16,4 @@ jobs:
       - name: PR Genie 🧞
         uses: david-wagih/PR-Genie@v1.2.0
         with:
-          openai-key: ${{ secrets.OPENAI_API_KEY }}
+          openai-key: ${{ secrets.OPENAI_KEY }}
