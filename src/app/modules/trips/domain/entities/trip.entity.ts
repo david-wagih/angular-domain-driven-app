@@ -4,6 +4,7 @@ import { Price } from '../value-objects/price.vo';
 import { DateRange } from '../value-objects/date-range.vo';
 import { TripCreatedEvent } from '../events/trip-created.event';
 import { TripParticipantAddedEvent } from '../events/trip-participant-added.event';
+import { TripCancelledEvent } from '../events/trip-cancelled.event';
 
 export interface TripProps {
   id?: string;
@@ -17,6 +18,14 @@ export interface TripProps {
   currentParticipants: number;
   rating: number;
   tags: string[];
+  status?: TripStatus;
+}
+
+export enum TripStatus {
+  DRAFT = 'DRAFT',
+  PUBLISHED = 'PUBLISHED',
+  CANCELLED = 'CANCELLED',
+  COMPLETED = 'COMPLETED'
 }
 
 export class Trip extends AggregateRoot {
@@ -30,6 +39,7 @@ export class Trip extends AggregateRoot {
   private currentParticipants: number;
   private rating: number;
   private readonly tags: string[];
+  public status: TripStatus;
 
   private constructor(props: TripProps) {
     super({ id: props.id });
@@ -43,6 +53,7 @@ export class Trip extends AggregateRoot {
     this.currentParticipants = props.currentParticipants;
     this.rating = props.rating;
     this.tags = props.tags;
+    this.status = props.status || TripStatus.DRAFT;
   }
 
   static create(props: TripProps): Trip {
@@ -147,6 +158,31 @@ export class Trip extends AggregateRoot {
     return this.dateRange.getDurationInDays();
   }
 
+  public setStatus(status: TripStatus) {
+    this.status = status;
+  }
+
+  public cancel(reason?: string): void {
+    if (this.status === TripStatus.CANCELLED) {
+      throw new Error('Trip is already cancelled');
+    }
+    if (this.status === TripStatus.COMPLETED) {
+      throw new Error('Cannot cancel a completed trip');
+    }
+    this.status = TripStatus.CANCELLED;
+    this.addDomainEvent(new TripCancelledEvent(this, reason));
+  }
+
+  public getStatusColor(): string {
+    switch (this.status) {
+      case TripStatus.DRAFT: return 'gray';
+      case TripStatus.PUBLISHED: return 'green';
+      case TripStatus.CANCELLED: return 'red';
+      case TripStatus.COMPLETED: return 'blue';
+      default: return 'black';
+    }
+  }
+
   toJSON(): TripProps {
     return {
       id: this.id,
@@ -159,7 +195,8 @@ export class Trip extends AggregateRoot {
       maxParticipants: this.maxParticipants,
       currentParticipants: this.currentParticipants,
       rating: this.rating,
-      tags: [...this.tags]
+      tags: [...this.tags],
+      status: this.status
     };
   }
 } 
