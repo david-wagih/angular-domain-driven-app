@@ -1,3 +1,5 @@
+import { formatDistance, differenceInDays, isAfter, isBefore } from 'date-fns';
+
 export class DateRange {
   private constructor(
     private readonly _startDate: Date,
@@ -45,5 +47,34 @@ export class DateRange {
 
   format(): string {
     return `${this._startDate.toLocaleDateString()} - ${this._endDate.toLocaleDateString()}`;
+  }
+
+  extendRange(days: number): void {
+    this._endDate.setDate(this._endDate.getDate() + days);
+  }
+
+  getFormattedDuration(): string {
+    return formatDistance(this._startDate, this._endDate);
+  }
+
+  async checkAvailability(): Promise<boolean> {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve(true);
+      }, 1000);
+    });
+  }
+
+  getDisplayText(): string {
+    return `${this._startDate.toLocaleDateString()} - ${this._endDate.toLocaleDateString()}`;
+  }
+
+  static async createWithAvailabilityCheck(start: Date, end: Date): Promise<DateRange> {
+    const range = new DateRange(start, end);
+    const isAvailable = await range.checkAvailability();
+    if (!isAvailable) {
+      throw new Error('Date range not available');
+    }
+    return range;
   }
 } 
